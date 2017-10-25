@@ -1,28 +1,28 @@
 'use strict';
 
-function createBasePageOptions(pageStack, model) {
+function createBasePageOptions (pageStack, model) {
   return {
-    created: function created() {
+    created: function created () {
       model.onLoad(pageStack.router.params);
     },
-    beforeMount: function beforeMount() {
+    beforeMount: function beforeMount () {
       model.onShow();
     },
-    mounted: function mounted() {
+    mounted: function mounted () {
       model.onReady();
     },
-    destroyed: function destroyed() {
+    destroyed: function destroyed () {
       model.onUnload();
     }
-  };
+  }
 }
 
 /* eslint-disable */
-function hasOwnProperty(obj, prop) {
+function hasOwnProperty (obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-function decode(qs, sep, eq, options) {
+function decode (qs, sep, eq, options) {
   sep = sep || '&';
   eq = eq || '=';
   var obj = {};
@@ -47,11 +47,8 @@ function decode(qs, sep, eq, options) {
 
   for (var i = 0; i < len; ++i) {
     var x = qs[i].replace(regexp, '%20'),
-        idx = x.indexOf(eq),
-        kstr,
-        vstr,
-        k,
-        v;
+      idx = x.indexOf(eq),
+      kstr, vstr, k, v;
 
     if (idx >= 0) {
       kstr = x.substr(0, idx);
@@ -76,12 +73,12 @@ function decode(qs, sep, eq, options) {
   return obj;
 }
 
-var noop$1 = function noop() {};
+var noop$1 = function () {};
 
 var inBrowser = typeof window !== 'undefined';
 
-var remove = function remove(arr, key) {
-  if (arr == null || arr.length === 0) return;
+var remove = function (arr, key) {
+  if (arr == null || arr.length === 0) { return }
   var index = arr.indexOf(key);
   if (index > -1) {
     arr.splice(index, 1);
@@ -89,56 +86,56 @@ var remove = function remove(arr, key) {
 };
 
 /* global wx */
-function initRoute(pageStack, pathMap) {
+/**
+ * wx.navigateTo 和 wx.redirectTo 不允许跳转到 tabbar 页面，只能用 wx.switchTab 跳转到 tabbar 页面,
+ * 因为小程序自身的约束，这个在page-stack中并没用限制
+ */
+function initRoute (pageStack, pathMap) {
   // 保留当前页面，跳转到应用内的某个页面
-  var navigateTo = function navigateTo(options) {
+  var navigateTo = function (options) {
     routeHandler(options, 'navigateTo');
   };
 
   // 关闭当前页面，跳转到应用内的某个页面
-  var redirectTo = function redirectTo(options) {
+  var redirectTo = function (options) {
     routeHandler(options, 'redirectTo');
   };
 
   // 跳转到 tabBar 页面，并关闭其他所有非 tabBar 页面
-  var switchTab = function switchTab(options) {
+  var switchTab = function (options) {
     routeHandler(options, 'switchTab');
   };
 
   // 关闭当前页面，返回上一页面或多级页面
-  var navigateBack = function navigateBack(options) {
-    pageStack.navigateBack(options);
+  var navigateBack = function (options) {
+    pageStack.navigateBack(options || {});
   };
 
   // 关闭当前页面，返回上一页面或多级页面
-  var reLaunch = function reLaunch(options) {
+  var reLaunch = function (options) {
     routeHandler(options, 'reLaunch');
   };
 
-  function routeHandler(options, method) {
-    var url = options.url,
-        _options$success = options.success,
-        success = _options$success === undefined ? noop$1 : _options$success,
-        _options$fail = options.fail,
-        fail = _options$fail === undefined ? noop$1 : _options$fail,
-        _options$complete = options.complete,
-        complete = _options$complete === undefined ? noop$1 : _options$complete;
-
+  function routeHandler (options, method) {
+    var url = options.url;
+    var success = options.success; if ( success === void 0 ) success = noop$1;
+    var fail = options.fail; if ( fail === void 0 ) fail = noop$1;
+    var complete = options.complete; if ( complete === void 0 ) complete = noop$1;
     if (url == null) {
       console.error('url字段为空');
-      return;
+      return
     }
     var urls = url.split('?');
     var path = urls[0];
     var page = pathMap[path];
     if (!page) {
       console.error('页面切换失败，' + path + '路径不存在');
-      return;
+      return
     }
     var name = page.name;
     if (name === pageStack.router.name) {
       console.log('同一个页面不需要切换');
-      return;
+      return
     }
     var params = decode(urls[1]);
     pageStack[method]({
@@ -161,22 +158,22 @@ function initRoute(pageStack, pathMap) {
   }
 }
 
-var pageStack = function pageStack(Vue, pages, models) {
+var pageStack = function (Vue, pages, models) {
   // 当前组件的实例
-  var pageStack = void 0;
+  var pageStack;
 
   var pathMap = Object.create(null);
   var nameMap = Object.create(null);
   pages.forEach(function (page) {
     pathMap[page.path] = page;
     nameMap[page.name] = page;
-  }
+  });
 
   // 对已经定义的页面组件进行扩展，添加生命周期钩子函数
-  );var expandPageComponent = function expandPageComponent(vm) {
-    pages.forEach(function (_ref) {
-      var name = _ref.name,
-          path = _ref.path;
+  var expandPageComponent = function (vm) {
+    pages.forEach(function (ref) {
+      var name = ref.name;
+      var path = ref.path;
 
       var PageComponent = Vue.component(name);
       var PageExtendComponent = PageComponent.extend(createBasePageOptions(vm, models[path]));
@@ -184,7 +181,7 @@ var pageStack = function pageStack(Vue, pages, models) {
     });
   };
 
-  function destroyPageComponent(cache, stack, name) {
+  function destroyPageComponent (cache, stack, name) {
     var vnode = cache[name];
     if (vnode) {
       vnode.componentInstance.$destroy();
@@ -198,7 +195,7 @@ var pageStack = function pageStack(Vue, pages, models) {
 
     abstract: true,
 
-    beforeCreate: function beforeCreate() {
+    beforeCreate: function beforeCreate () {
       if (pageStack) {
         console.error('page-stack组件只能使用一次，多个挂载点将导致路由混乱');
       }
@@ -206,103 +203,114 @@ var pageStack = function pageStack(Vue, pages, models) {
       initRoute(this, pathMap);
       expandPageComponent(this);
     },
-    created: function created() {
+
+    created: function created () {
       this.cache = Object.create(null);
       var page = pages[0];
       this.router = {
         path: page.path,
         params: {},
-        name: page.name
+        name: page.name,
+        tabBar: true
       };
       this.stack = [];
     },
-    destroyed: function destroyed() {
+
+    destroyed: function destroyed () {
       this.batchDestroyed(this.stack);
     },
 
-
     methods: {
-      update: function update() {
-        var _this = this;
+      update: function update () {
+        var this$1 = this;
 
         this.$forceUpdate();
         if (this.cache[this.router.name]) {
           this.$nextTick(function () {
-            models[_this.router.path].onShow();
+            models[this$1.router.path].onShow();
           });
         }
       },
-      batchDestroyed: function batchDestroyed(stack) {
+
+      batchDestroyed: function batchDestroyed (stack) {
+        var this$1 = this;
+
         for (var i = stack.length - 1; i >= 0; i--) {
-          var _name = stack[i];
-          models[nameMap[_name].path].onHide();
-          destroyPageComponent(this.cache, this.stack, _name);
+          var name = stack[i];
+          destroyPageComponent(this$1.cache, this$1.stack, name);
         }
       },
-      navigateTo: function navigateTo(options) {
+
+      navigateTo: function navigateTo (options) {
         models[this.router.path].onHide();
         this.router = options;
         this.update();
       },
-      redirectTo: function redirectTo(options) {
-        var _router = this.router,
-            path = _router.path,
-            name = _router.name;
 
-        models[path].onHide();
-        destroyPageComponent(this.cache, this.stack, name);
+      redirectTo: function redirectTo (options) {
+        destroyPageComponent(this.cache, this.stack, this.router.name);
         this.router = options;
         this.update();
       },
-      switchTab: function switchTab(options) {
+
+      switchTab: function switchTab (options) {
         var stack = this.stack.slice();
         var tabBars = [];
         var pageNames = [];
         this.stack = [];
         for (var i = 0; i < stack.length; i++) {
-          var _name2 = stack[i];
-          var page = nameMap[_name2];
+          var name = stack[i];
+          var page = nameMap[name];
           if (page.tabBar) {
-            tabBars.push(_name2);
+            tabBars.push(name);
           } else {
-            pageNames.push(_name2);
+            pageNames.push(name);
           }
         }
 
         this.batchDestroyed(pageNames);
         this.stack = tabBars;
+        if (this.router.tabBar) {
+          models[this.router.path].onHide();
+        }
         this.router = options;
         this.update();
       },
-      navigateBack: function navigateBack(options) {
+
+      navigateBack: function navigateBack (options) {
+        var this$1 = this;
+
         var delta = options.delta || 1;
         var stack = this.stack;
-        if (delta > this.stack.length) {
+        if (delta >= this.stack.length) {
+          destroyPageComponent(this.cache, this.stack, this.router.name);
           var page = pages[0];
           this.router = {
             path: page.path,
             params: {},
-            name: page.name
+            name: page.name,
+            tabBar: true
           };
         } else {
           var length = stack.length - 1;
           var min = length - delta;
-          var path = nameMap[stack[min]].path;
+          var page$1 = nameMap[stack[min]];
           for (var i = length; i > min; i--) {
-            var _name3 = stack[i];
-            models[nameMap[_name3].path].onHide();
-            destroyPageComponent(this.cache, this.stack, _name3);
+            var name = stack[i];
+            destroyPageComponent(this$1.cache, this$1.stack, name);
           }
           this.router = {
-            path: path,
+            path: page$1.path,
             params: {},
-            name: name
+            name: page$1.name,
+            tabBar: page$1.tabBar
           };
         }
 
         this.update();
       },
-      reLaunch: function reLaunch(options) {
+
+      reLaunch: function reLaunch (options) {
         var stack = this.stack.slice();
         this.stack = [];
         this.batchDestroyed(stack);
@@ -311,7 +319,7 @@ var pageStack = function pageStack(Vue, pages, models) {
       }
     },
 
-    render: function render(h) {
+    render: function render (h) {
       var cache = this.cache;
       var stack = this.stack;
       var name = this.router.name;
@@ -323,14 +331,23 @@ var pageStack = function pageStack(Vue, pages, models) {
       }
       stack.push(name);
       vnode.data.keepAlive = true;
-      return vnode;
+      return vnode
     }
-  };
+  }
 };
 
-var wxAppLifecycleHooks = ['onInit', 'onLoad', 'onReady', 'onShow', 'onHide', 'onUnload', 'onPullDownRefresh', 'onReachBottom'];
+var wxAppLifecycleHooks = [
+  'onInit',
+  'onLoad',
+  'onReady',
+  'onShow',
+  'onHide',
+  'onUnload',
+  'onPullDownRefresh',
+  'onReachBottom'
+];
 
-var noop = function noop() {};
+var noop = function () {};
 
 /*
  pages和option的格式
@@ -350,8 +367,7 @@ var noop = function noop() {};
 var index = function (Vue, options) {
   var pages = options.pages;
   var models = options.models;
-
-  var _loop = function _loop(key) {
+  var loop = function ( key ) {
     var model = models[key];
     wxAppLifecycleHooks.forEach(function (hook) {
       if (!model[hook]) {
@@ -360,9 +376,7 @@ var index = function (Vue, options) {
     });
   };
 
-  for (var key in models) {
-    _loop(key);
-  }
+  for (var key in models) loop( key );
   Vue.component('page-stack', pageStack(Vue, pages, models));
 };
 

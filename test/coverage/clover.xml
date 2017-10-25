@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1508909735928" clover="3.2.0">
-  <project timestamp="1508909735928" name="All files">
+<coverage generated="1508910643782" clover="3.2.0">
+  <project timestamp="1508910643782" name="All files">
     <metrics statements="170" coveredstatements="154" conditionals="61" coveredconditionals="45" methods="22" coveredmethods="19" elements="253" coveredelements="218" complexity="0" loc="170" ncloc="170" packages="1" files="7" classes="7">
       <file name="base-page.js" path="/Users/wanglei/platform/workspace/page-stack/src/base-page.js">
         <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>

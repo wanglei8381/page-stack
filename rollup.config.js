@@ -1,5 +1,4 @@
-import resolve from 'rollup-plugin-node-resolve'
-import babel from 'rollup-plugin-babel'
+import buble from 'rollup-plugin-buble'
 
 export default {
   entry: 'src/index.js',
@@ -7,9 +6,6 @@ export default {
   dest: 'index.js',
   sourceMap: true,
   plugins: [
-    resolve(),
-    babel({
-      exclude: 'node_modules/**' // only transpile our source code
-    })
+    buble()
   ]
 };
