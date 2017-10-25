@@ -1,4 +1,8 @@
-'use strict';
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.PageStack = factory());
+}(this, (function () { 'use strict';
 
 function createBasePageOptions (pageStack, model) {
   return {
@@ -162,6 +166,10 @@ var pageStack = function (Vue, pages, models) {
   // 当前组件的实例
   var pageStack;
 
+  var transitionData = {
+    name: 'wx-page-open',
+    type: 'transition'
+  };
   var pathMap = Object.create(null);
   var nameMap = Object.create(null);
   pages.forEach(function (page) {
@@ -214,6 +222,8 @@ var pageStack = function (Vue, pages, models) {
         tabBar: true
       };
       this.stack = [];
+      // 当前的操作wx.路由是关闭当前页面
+      this.close = false;
     },
 
     destroyed: function destroyed () {
@@ -244,12 +254,14 @@ var pageStack = function (Vue, pages, models) {
       navigateTo: function navigateTo (options) {
         models[this.router.path].onHide();
         this.router = options;
+        this.close = false;
         this.update();
       },
 
       redirectTo: function redirectTo (options) {
         destroyPageComponent(this.cache, this.stack, this.router.name);
         this.router = options;
+        this.close = false;
         this.update();
       },
 
@@ -307,6 +319,7 @@ var pageStack = function (Vue, pages, models) {
           };
         }
 
+        this.close = true;
         this.update();
       },
 
@@ -315,6 +328,7 @@ var pageStack = function (Vue, pages, models) {
         this.stack = [];
         this.batchDestroyed(stack);
         this.router = options;
+        this.close = false;
         this.update();
       }
     },
@@ -326,9 +340,12 @@ var pageStack = function (Vue, pages, models) {
       var vnode = cache[name];
       if (!vnode) {
         vnode = cache[name] = h(name);
+        vnode.key = "__transition-" + (this._uid) + "-" + name;
+        vnode.data.transition = transitionData;
       } else {
         remove(stack, name);
       }
+      vnode.data.transition.name = this.close ? 'wx-page-close' : 'wx-page-open';
       stack.push(name);
       vnode.data.keepAlive = true;
       return vnode
@@ -380,5 +397,7 @@ var index = function (Vue, options) {
   Vue.component('page-stack', pageStack(Vue, pages, models));
 };
 
-module.exports = index;
+return index;
+
+})));
 //# sourceMappingURL=index.js.map

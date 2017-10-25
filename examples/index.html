@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta lang="zh">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="description" content="">
+  <meta name="keyword" content="">
+  <script src="//static.wuage.com/m-goods/lib/flexible.js?750&100&1"></script>
+  <title>page-stack</title>
+  <style>
+    html, body, #app {
+      margin: 0;
+      height: 100%;
+      position: relative;
+    }
+
+    .page {
+      position: absolute;
+      top: 30px;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      font-size: 1rem;
+      box-shadow: -2px 0px 1px -1px #f1f1f1;
+    }
+
+    .a {
+      background: #a2fca2;
+    }
+
+    .b {
+      background: #b3d8ff;
+    }
+
+    .c {
+      background: #c0a16b;
+    }
+
+    .wx-page-open-enter {
+      transform: translateX(100%);
+    }
+
+    .wx-page-open-enter-active {
+      transition: all .3s ease;
+    }
+
+    .wx-page-open-leave-to {
+      transform: translateX(-100px);
+    }
+
+    .wx-page-open-leave-active {
+      transition: all .3s ease-out;
+    }
+
+    .wx-page-close-leave-to {
+      transform: translateX(100%);
+    }
+
+    .wx-page-close-leave-active {
+      transition: transform .3s ease-out;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <button @click="navigateTo">navigateTo</button>
+  <button @click="navigateBack">navigateBack</button>
+  <page-stack></page-stack>
+</div>
+<script src="https://cdn.bootcss.com/vue/2.4.4/vue.js"></script>
+<script src="../index.js"></script>
+<script>
+  window.wx = {}
+  const models = {
+    a: {},
+    b: {},
+    c: {}
+  }
+  const pages = [
+    {
+      name: 'PageA',
+      path: 'a'
+    },
+    {
+      name: 'PageB',
+      path: 'b'
+    },
+    {
+      name: 'PageC',
+      path: 'c'
+    }
+  ]
+  Vue.component('PageA', {
+    template: '<div class="page a">PageA</div>'
+  })
+  Vue.component('PageB', {
+    template: '<div class="page b">PageB</div>'
+  })
+  Vue.component('PageC', {
+    template: '<div class="page c">PageC</div>'
+  })
+  Vue.use(PageStack, {
+    pages,
+    models
+  })
+
+  let i = 0
+  let arr = ['a', 'b', 'c']
+  new Vue({
+    el: '#app',
+    data: {
+      open: false
+    },
+    methods: {
+      navigateTo() {
+        wx.navigateTo({ url: arr[++i % 3] })
+      },
+      navigateBack() {
+        wx.navigateBack()
+      }
+    }
+  })
+</script>
+</body>
+</html>

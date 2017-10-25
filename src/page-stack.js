@@ -1,10 +1,15 @@
 import basePage from './base-page'
 import { initRoute } from './route'
 import { remove } from './utils'
+
 export const pageStack = (Vue, pages, models) => {
   // 当前组件的实例
   let pageStack
 
+  const transitionData = {
+    name: 'wx-page-open',
+    type: 'transition'
+  }
   const pathMap = Object.create(null)
   const nameMap = Object.create(null)
   pages.forEach((page) => {
@@ -54,6 +59,8 @@ export const pageStack = (Vue, pages, models) => {
         tabBar: true
       }
       this.stack = []
+      // 当前的操作wx.路由是关闭当前页面
+      this.close = false
     },
 
     destroyed () {
@@ -80,12 +87,14 @@ export const pageStack = (Vue, pages, models) => {
       navigateTo (options) {
         models[this.router.path].onHide()
         this.router = options
+        this.close = false
         this.update()
       },
 
       redirectTo (options) {
         destroyPageComponent(this.cache, this.stack, this.router.name)
         this.router = options
+        this.close = false
         this.update()
       },
 
@@ -141,6 +150,7 @@ export const pageStack = (Vue, pages, models) => {
           }
         }
 
+        this.close = true
         this.update()
       },
 
@@ -149,6 +159,7 @@ export const pageStack = (Vue, pages, models) => {
         this.stack = []
         this.batchDestroyed(stack)
         this.router = options
+        this.close = false
         this.update()
       }
     },
@@ -160,9 +171,12 @@ export const pageStack = (Vue, pages, models) => {
       let vnode = cache[name]
       if (!vnode) {
         vnode = cache[name] = h(name)
+        vnode.key = `__transition-${this._uid}-` + name
+        vnode.data.transition = transitionData
       } else {
         remove(stack, name)
       }
+      vnode.data.transition.name = this.close ? 'wx-page-close' : 'wx-page-open'
       stack.push(name)
       vnode.data.keepAlive = true
       return vnode
