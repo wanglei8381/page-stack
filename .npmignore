@@ -1,3 +1,7 @@
-example/
+examples/
 node_modules/
 npm-debug.log
+src/
+test/
+rollup.config.js
+package-lock.json

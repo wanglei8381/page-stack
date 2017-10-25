@@ -50,7 +50,8 @@ export const pageStack = (Vue, pages, models) => {
       this.router = {
         path: page.path,
         params: {},
-        name: page.name
+        name: page.name,
+        tabBar: true
       }
       this.stack = []
     },
@@ -72,7 +73,6 @@ export const pageStack = (Vue, pages, models) => {
       batchDestroyed (stack) {
         for (let i = stack.length - 1; i >= 0; i--) {
           const name = stack[i]
-          models[nameMap[name].path].onHide()
           destroyPageComponent(this.cache, this.stack, name)
         }
       },
@@ -84,9 +84,7 @@ export const pageStack = (Vue, pages, models) => {
       },
 
       redirectTo (options) {
-        const { path, name } = this.router
-        models[path].onHide()
-        destroyPageComponent(this.cache, this.stack, name)
+        destroyPageComponent(this.cache, this.stack, this.router.name)
         this.router = options
         this.update()
       },
@@ -108,6 +106,9 @@ export const pageStack = (Vue, pages, models) => {
 
         this.batchDestroyed(pageNames)
         this.stack = tabBars
+        if (this.router.tabBar) {
+          models[this.router.path].onHide()
+        }
         this.router = options
         this.update()
       },
@@ -115,26 +116,28 @@ export const pageStack = (Vue, pages, models) => {
       navigateBack (options) {
         const delta = options.delta || 1
         const stack = this.stack
-        if (delta > this.stack.length) {
+        if (delta >= this.stack.length) {
+          destroyPageComponent(this.cache, this.stack, this.router.name)
           const page = pages[0]
           this.router = {
             path: page.path,
             params: {},
-            name: page.name
+            name: page.name,
+            tabBar: true
           }
         } else {
           const length = stack.length - 1
           const min = length - delta
-          const path = nameMap[stack[min]].path
+          const page = nameMap[stack[min]]
           for (let i = length; i > min; i--) {
             const name = stack[i]
-            models[nameMap[name].path].onHide()
             destroyPageComponent(this.cache, this.stack, name)
           }
           this.router = {
-            path,
+            path: page.path,
             params: {},
-            name
+            name: page.name,
+            tabBar: page.tabBar
           }
         }
 

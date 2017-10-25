@@ -1,4 +1,8 @@
 /* global wx */
+/**
+ * wx.navigateTo 和 wx.redirectTo 不允许跳转到 tabbar 页面，只能用 wx.switchTab 跳转到 tabbar 页面,
+ * 因为小程序自身的约束，这个在page-stack中并没用限制
+ */
 import { decode } from './decode'
 import {
   inBrowser,
@@ -23,7 +27,7 @@ export function initRoute (pageStack, pathMap) {
 
   // 关闭当前页面，返回上一页面或多级页面
   const navigateBack = options => {
-    pageStack.navigateBack(options)
+    pageStack.navigateBack(options || {})
   }
 
   // 关闭当前页面，返回上一页面或多级页面
