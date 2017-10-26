@@ -87,7 +87,7 @@ window.wxTransformGetPage = key => {
   return page
 }
 
-// key应该解析页面时获取，这里只是测试
+// key应该解析页面时获取，这里只是方便测试
 window.Page = (key, options) => {
   window.wxTransformPageKey[key] = options
 }

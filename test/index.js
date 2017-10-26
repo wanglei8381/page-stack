@@ -1,8 +1,8 @@
 import Vue from 'vue'
-import pageStack from '../src'
 import './service'
 import './pages'
 import './models'
+import pageStack from '../src'
 
 const wx = window.wx = {}
 
@@ -38,6 +38,8 @@ Vue.use(pageStack, {
   ]
 })
 
+const getModel = window.wxTransformGetPage
+
 describe('Component page-stack', () => {
   let vnode, vm
 
@@ -62,15 +64,15 @@ describe('Component page-stack', () => {
 
   // 初始化小程序，首页A入栈, stack=[A]
   it('App init', () => {
-    const model = models['page/a']
+    const model = getModel('page/a')
     expect(model._active).toBe(true)
     expect(model._ready).toBe(true)
   })
 
   // switchTab -> B, stack=[A,B]
   it('switchTab', done => {
-    const modelA = models['page/a']
-    const modelB = models['page/b']
+    const modelA = getModel('page/a')
+    const modelB = getModel('page/b')
     const onReady = modelB.onReady
     modelB.onReady = () => {
       onReady.call(modelB)
@@ -88,9 +90,9 @@ describe('Component page-stack', () => {
 
   // navigateTo -> C, stack=[A,B,C]
   it('navigateTo', done => {
-    const modelA = models['page/a']
-    const modelB = models['page/b']
-    const modelC = models['page/c']
+    const modelB = getModel('page/b')
+    const modelA = getModel('page/a')
+    const modelC = getModel('page/c')
     const onReady = modelC.onReady
     modelC.onReady = () => {
       onReady.call(modelC)
@@ -112,10 +114,10 @@ describe('Component page-stack', () => {
 
   // navigateTo -> D, stack=[A,B,C,D]
   it('navigateTo', done => {
-    const modelA = models['page/a']
-    const modelB = models['page/b']
-    const modelC = models['page/c']
-    const modelD = models['page/d']
+    const modelA = getModel('page/a')
+    const modelB = getModel('page/b')
+    const modelC = getModel('page/c')
+    const modelD = getModel('page/d')
     const onReady = modelD.onReady
     modelD.onReady = () => {
       onReady.call(modelD)
@@ -137,10 +139,10 @@ describe('Component page-stack', () => {
 
   // navigateBack -> 2, stack=[A,B]
   it('navigateBack', done => {
-    const modelA = models['page/a']
-    const modelB = models['page/b']
-    const modelC = models['page/c']
-    const modelD = models['page/d']
+    const modelA = getModel('page/a')
+    const modelB = getModel('page/b')
+    const modelC = getModel('page/c')
+    const modelD = getModel('page/d')
     const onShow = modelB.onShow
     modelB.onShow = () => {
       onShow.call(modelB)
@@ -162,11 +164,11 @@ describe('Component page-stack', () => {
 
   // redirectTo -> E, stack=[A,E]
   it('redirectTo', done => {
-    const modelA = models['page/a']
-    const modelB = models['page/b']
-    const modelC = models['page/c']
-    const modelD = models['page/d']
-    const modelE = models['page/e']
+    const modelA = getModel('page/a')
+    const modelB = getModel('page/b')
+    const modelC = getModel('page/c')
+    const modelD = getModel('page/d')
+    const modelE = getModel('page/e')
     const onReady = modelE.onReady
     modelE.onReady = () => {
       onReady.call(modelE)
@@ -187,12 +189,12 @@ describe('Component page-stack', () => {
 
   // reLaunch -> F, stack=[F]
   it('reLaunch', done => {
-    const modelA = models['page/a']
-    const modelB = models['page/b']
-    const modelC = models['page/c']
-    const modelD = models['page/d']
-    const modelE = models['page/e']
-    const modelF = models['page/f']
+    const modelA = getModel('page/a')
+    const modelB = getModel('page/b')
+    const modelC = getModel('page/c')
+    const modelD = getModel('page/d')
+    const modelE = getModel('page/e')
+    const modelF = getModel('page/f')
     const onReady = modelF.onReady
     modelF.onReady = () => {
       onReady.call(modelF)
@@ -210,8 +212,8 @@ describe('Component page-stack', () => {
 
   // navigateBack -> home, stack=[A]
   it('navigateBack', done => {
-    const modelA = models['page/a']
-    const modelF = models['page/f']
+    const modelA = getModel('page/a')
+    const modelF = getModel('page/f')
     const onReady = modelA.onReady
     modelA.onReady = () => {
       onReady.call(modelA)
@@ -226,7 +228,7 @@ describe('Component page-stack', () => {
 
   // destroyed, stack=[A]
   it('destroyed', done => {
-    const modelA = models['page/a']
+    const modelA = getModel('page/a')
     const onUnload = modelA.onUnload
     modelA.onUnload = () => {
       onUnload.call(modelA)
