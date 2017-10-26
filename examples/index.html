@@ -16,26 +16,28 @@
       position: relative;
     }
 
-    .page {
-      position: absolute;
-      top: 30px;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      font-size: 1rem;
-      box-shadow: -2px 0px 1px -1px #f1f1f1;
-    }
-
-    .a {
+    .page-a {
       background: #a2fca2;
     }
 
-    .b {
+    .page-b {
       background: #b3d8ff;
     }
 
-    .c {
+    .page-c {
       background: #c0a16b;
+    }
+
+    .page-d {
+      background: #dd8888;
+    }
+
+    .page-e {
+      background: #e0c46c;
+    }
+
+    .page-f {
+      background: #ff0000;
     }
 
     .wx-page-open-enter {
@@ -62,61 +64,101 @@
       transition: transform .3s ease-out;
       z-index: 1;
     }
+
+    .wx-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+    }
+
+    .wx-page-scroll {
+      position: relative;
+      width: 100%;
+      flex: 1;
+      overflow: auto;
+    }
+
+    .wx-page-container {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      font-size: 1rem;
+      box-shadow: -2px 0px 1px -1px #f1f1f1;
+    }
+
+    .wx-tabbar-group {
+      display: flex;
+      width: 100%;
+      height: 1.1rem;
+      background: #1e1e1e;
+      color: #787878;
+      border-top: 1px solid black;
+    }
+
+    .wx-tabbar-item {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      width: 1%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wx-tabbar-item.wx-tabbar-selected {
+      color: #ffffff;
+    }
+
+    .tabbar-icon-path {
+      width: .60rem;
+      height: .60rem;
+      background-repeat: no-repeat;
+      background-size: contain;
+      background-position: center;
+    }
   </style>
 </head>
 <body>
 <div id="app">
-  <button @click="navigateTo">navigateTo</button>
-  <button @click="navigateBack">navigateBack</button>
-  <page-stack></page-stack>
+  <!--<button @click="navigateTo">navigateTo</button>-->
+  <!--<button @click="navigateBack">navigateBack</button>-->
+  <div class="wx-container">
+    <div class="wx-page-scroll">
+      <page-stack></page-stack>
+    </div>
+    <div class="wx-tabbar-group">
+      <div class="wx-tabbar-item wx-tabbar-selected">
+        <div class="tabbar-icon-path" style="background-image: url(images/home.png)"></div>
+        <div class="tabbar-text">店铺首页</div>
+      </div>
+      <div class="wx-tabbar-item">
+        <div class="tabbar-icon-path" style="background-image: url(images/dynamic.png)"></div>
+        <div class="tabbar-text">商家动态</div>
+      </div>
+      <div class="wx-tabbar-item">
+        <div class="tabbar-icon-path" style="background-image: url(images/quotation.png)"></div>
+        <div class="tabbar-text">今日报价</div>
+      </div>
+    </div>
+  </div>
 </div>
 <script src="https://cdn.bootcss.com/vue/2.4.4/vue.js"></script>
-<script src="../index.js"></script>
+<script src="./index.js"></script>
 <script>
   window.wx = {}
-  const models = {
-    a: {},
-    b: {},
-    c: {}
-  }
-  const pages = [
-    {
-      name: 'PageA',
-      path: 'a'
-    },
-    {
-      name: 'PageB',
-      path: 'b'
-    },
-    {
-      name: 'PageC',
-      path: 'c'
-    }
-  ]
-  Vue.component('PageA', {
-    template: '<div class="page a">PageA</div>'
-  })
-  Vue.component('PageB', {
-    template: '<div class="page b">PageB</div>'
-  })
-  Vue.component('PageC', {
-    template: '<div class="page c">PageC</div>'
-  })
-  Vue.use(PageStack, {
-    pages,
-    models
-  })
-
   let i = 0
-  let arr = ['a', 'b', 'c']
-  new Vue({
+  let arr = ['page/a', 'page/b', 'page/c', 'page/d', 'page/e', 'page/f']
+  window.vm = new Vue({
     el: '#app',
     data: {
       open: false
     },
     methods: {
       navigateTo() {
-        wx.navigateTo({ url: arr[++i % 3] })
+        wx.navigateTo({ url: arr[++i % 6] })
       },
       navigateBack() {
         wx.navigateBack()

@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -w -c",
+    "dev": "rollup -w -c rollup.config.dev.js",
     "lint": "eslint src",
     "test": "jest"
   },

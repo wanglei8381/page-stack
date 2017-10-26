@@ -1,8 +1,190 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global.PageStack = factory());
-}(this, (function () { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('vue')) :
+	typeof define === 'function' && define.amd ? define(['vue'], factory) :
+	(factory(global.Vue));
+}(this, (function (Vue) { 'use strict';
+
+Vue = Vue && Vue.hasOwnProperty('default') ? Vue['default'] : Vue;
+
+var lifecycleHooks = [
+  'onLoad',
+  'onReady',
+  'onShow',
+  'onHide',
+  'onUnload'
+];
+
+var isHook = function (hook) { return lifecycleHooks.indexOf(hook) > -1; };
+
+var cache = {};
+
+var noop = function () {};
+
+var WPage = function WPage (options) {
+  var this$1 = this;
+  if ( options === void 0 ) options = {};
+
+  this.options = options;
+  for (var key in options) {
+    var item = options[key];
+    if (isFunction(item)) {
+      if (!isHook(item)) {
+        this$1[key] = item;
+      } else {
+        options[key] = item.bind(this$1);
+      }
+    } else if (isPrimitive(item)) {
+      this$1[key] = item;
+    } else {
+      this$1[key] = JSON.parse(JSON.stringify(item));
+    }
+  }
+
+  for (var i = 0; i < lifecycleHooks.length; i++) {
+    var key$1 = lifecycleHooks[i];
+    if (!options[key$1]) {
+      options[key$1] = noop;
+    }
+  }
+};
+
+WPage.prototype.setData = function setData (data) {};
+
+WPage.prototype.onLoad = function onLoad (options) {
+  this.options.onLoad(options);
+};
+
+WPage.prototype.onReady = function onReady () {
+  this.options.onReady();
+};
+
+WPage.prototype.onShow = function onShow () {
+  this.options.onShow();
+};
+
+WPage.prototype.onHide = function onHide () {
+  this.options.onHide();
+};
+
+WPage.prototype.onUnload = function onUnload () {
+  this.options.onUnload();
+  cache[this.router] = null;
+};
+
+function isFunction (obj) {
+  return obj != null && typeof obj === 'function'
+}
+
+function isPrimitive (value) {
+  return (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean'
+  )
+}
+
+window.wxTransformPageKey = {};
+
+window.wxTransformGetPage = function (key) {
+  if (cache[key]) {
+    return cache[key]
+  }
+  var options = window.wxTransformPageKey[key];
+  var page = new WPage(options);
+  page.router = key;
+  cache[key] = page;
+  return page
+};
+
+// key应该解析页面时获取，这里只是方便测试
+window.Page = function (key, options) {
+  window.wxTransformPageKey[key] = options;
+};
+
+Vue.component('PageA', {
+  template: '<div class="wx-page-container"><div class="page-a">PageA</div></div>'
+});
+
+Vue.component('PageB', {
+  template: '<div class="wx-page-container"><div class="page-b">PageB</div></div>'
+});
+
+Vue.component('PageC', {
+  template: '<div class="wx-page-container"><div class="page-c">PageC</div></div>'
+});
+
+Vue.component('PageD', {
+  template: '<div class="wx-page-container"><div class="page-d">PageD</div></div>'
+});
+
+Vue.component('PageE', {
+  template: '<div class="wx-page-container"><div class="page-e">PageE</div></div>'
+});
+
+Vue.component('PageF', {
+  template: '<div class="wx-page-container"><div class="page-f">PageF</div></div>'
+});
+
+var PageA = {
+  data: {
+    text: 'PageA'
+  },
+  onLoad: function onLoad (options) {
+    this._unload = false;
+    this.params = options;
+  },
+  onReady: function onReady () {
+    this._ready = true;
+  },
+  onShow: function onShow () {
+    this._active = true;
+  },
+  onHide: function onHide () {
+    this._active = false;
+  },
+  onUnload: function onUnload () {
+    this._ready = false;
+    this._active = false;
+    this._unload = true;
+  }
+};
+
+var PageB = Object.assign({}, PageA, {
+  data: {
+    text: 'PageB'
+  }
+});
+
+var PageC = Object.assign({}, PageA, {
+  data: {
+    text: 'PageC'
+  }
+});
+
+var PageD = Object.assign({}, PageA, {
+  data: {
+    text: 'PageD'
+  }
+});
+
+var PageE = Object.assign({}, PageA, {
+  data: {
+    text: 'PageE'
+  }
+});
+
+var PageF = Object.assign({}, PageA, {
+  data: {
+    text: 'PageF'
+  }
+});
+
+Page('page/a', PageA);
+Page('page/b', PageB);
+Page('page/c', PageC);
+Page('page/d', PageD);
+Page('page/e', PageE);
+Page('page/f', PageF);
 
 var getPage$1 = window.wxTransformGetPage;
 function addPageHook (pageStack, path) {
@@ -84,7 +266,7 @@ function decode (qs, sep, eq, options) {
   return obj;
 }
 
-var noop = function () {};
+var noop$1 = function () {};
 
 var inBrowser = typeof window !== 'undefined';
 
@@ -129,9 +311,9 @@ function initRoute (pageStack, pathMap) {
 
   function routeHandler (options, method) {
     var url = options.url;
-    var success = options.success; if ( success === void 0 ) success = noop;
-    var fail = options.fail; if ( fail === void 0 ) fail = noop;
-    var complete = options.complete; if ( complete === void 0 ) complete = noop;
+    var success = options.success; if ( success === void 0 ) success = noop$1;
+    var fail = options.fail; if ( fail === void 0 ) fail = noop$1;
+    var complete = options.complete; if ( complete === void 0 ) complete = noop$1;
     if (url == null) {
       console.error('url字段为空');
       return
@@ -170,10 +352,15 @@ function initRoute (pageStack, pathMap) {
 }
 
 var getPage = window.wxTransformGetPage;
-var pageStack = function (Vue, pages) {
+var pageStack$1 = function (Vue$$1, pages) {
   // 当前组件的实例
   var pageStack;
 
+  // 进入离开动画的名字
+  var getTransitionName = {
+    1: 'wx-page-open',
+    2: 'wx-page-close'
+  };
   var transitionData = {
     name: 'wx-page-open',
     type: 'transition'
@@ -191,9 +378,9 @@ var pageStack = function (Vue, pages) {
       var name = ref.name;
       var path = ref.path;
 
-      var PageComponent = Vue.component(name);
+      var PageComponent = Vue$$1.component(name);
       var PageExtendComponent = PageComponent.extend(addPageHook(vm, path));
-      Vue.component(name, PageExtendComponent);
+      Vue$$1.component(name, PageExtendComponent);
     });
   };
 
@@ -230,8 +417,8 @@ var pageStack = function (Vue, pages) {
         tabBar: true
       };
       this.stack = [];
-      // 当前的操作wx.路由是关闭当前页面
-      this.close = false;
+      // 页面进入离开的类型，1：普通进入，2：返回，3：tab切换
+      this.gotoType = 1;
     },
 
     destroyed: function destroyed () {
@@ -271,14 +458,14 @@ var pageStack = function (Vue, pages) {
       navigateTo: function navigateTo (options) {
         this.callPageHook();
         this.router = options;
-        this.close = false;
+        this.gotoType = 1;
         this.update();
       },
 
       redirectTo: function redirectTo (options) {
         destroyPageComponent(this.cache, this.stack, this.router.name);
         this.router = options;
-        this.close = false;
+        this.gotoType = 1;
         this.update();
       },
 
@@ -302,6 +489,7 @@ var pageStack = function (Vue, pages) {
         if (this.router.tabBar) {
           this.callPageHook();
         }
+        this.gotoType = 3;
         this.router = options;
         this.update();
       },
@@ -336,7 +524,7 @@ var pageStack = function (Vue, pages) {
           };
         }
 
-        this.close = true;
+        this.gotoType = 2;
         this.update();
       },
 
@@ -345,7 +533,7 @@ var pageStack = function (Vue, pages) {
         this.stack = [];
         this.batchDestroyed(stack);
         this.router = options;
-        this.close = false;
+        this.gotoType = 1;
         this.update();
       }
     },
@@ -362,7 +550,7 @@ var pageStack = function (Vue, pages) {
       } else {
         remove(stack, name);
       }
-      vnode.data.transition.name = this.close ? 'wx-page-close' : 'wx-page-open';
+      vnode.data.transition.name = getTransitionName[this.gotoType];
       stack.push(name);
       vnode.data.keepAlive = true;
       return vnode
@@ -370,21 +558,42 @@ var pageStack = function (Vue, pages) {
   }
 };
 
-/*
- pages和option的格式
-
- name是页面组件的名字，path是对应的小程序页面地址，tabBar是在小程序tabBar列表中的页面
- pages: [
- {name: 'PagesIndexIndex', path: 'pages/index/index', tabBar: true},
- {name: 'PagesLogsLogs', path: 'pages/logs/logs'}
- ]
- */
-var index = function (Vue, options) {
+var pageStack = function (Vue$$1, options) {
   var pages = options.pages;
-  Vue.component('page-stack', pageStack(Vue, pages));
+  Vue$$1.component('page-stack', pageStack$1(Vue$$1, pages));
 };
 
-return index;
+Vue.use(pageStack, {
+  pages: [
+    {
+      name: 'PageA',
+      path: 'page/a',
+      tabBar: true
+    },
+    {
+      name: 'PageB',
+      path: 'page/b',
+      tabBar: true
+    },
+    {
+      name: 'PageC',
+      path: 'page/c'
+    },
+    {
+      name: 'PageD',
+      path: 'page/d'
+    },
+    {
+      name: 'PageE',
+      path: 'page/e'
+    },
+    {
+      name: 'PageF',
+      path: 'page/f',
+      tabBar: true
+    }
+  ]
+});
 
 })));
 //# sourceMappingURL=index.js.map

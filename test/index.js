@@ -1,42 +1,7 @@
 import Vue from 'vue'
-import './service'
-import './pages'
-import './models'
-import pageStack from '../src'
+import './helpers'
 
 const wx = window.wx = {}
-
-Vue.use(pageStack, {
-  pages: [
-    {
-      name: 'PageA',
-      path: 'page/a',
-      tabBar: true
-    },
-    {
-      name: 'PageB',
-      path: 'page/b',
-      tabBar: true
-    },
-    {
-      name: 'PageC',
-      path: 'page/c'
-    },
-    {
-      name: 'PageD',
-      path: 'page/d'
-    },
-    {
-      name: 'PageE',
-      path: 'page/e'
-    },
-    {
-      name: 'PageF',
-      path: 'page/f',
-      tabBar: true
-    }
-  ]
-})
 
 const getModel = window.wxTransformGetPage
 

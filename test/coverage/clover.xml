@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1509025840096" clover="3.2.0">
-  <project timestamp="1509025840096" name="All files">
+<coverage generated="1509027167125" clover="3.2.0">
+  <project timestamp="1509027167125" name="All files">
     <metrics statements="179" coveredstatements="164" conditionals="70" coveredconditionals="52" methods="20" coveredmethods="19" elements="269" coveredelements="235" complexity="0" loc="179" ncloc="179" packages="1" files="6" classes="6">
       <file name="decode.js" path="/Users/wanglei/platform/workspace/page-stack/src/decode.js">
         <metrics statements="30" coveredstatements="23" conditionals="22" coveredconditionals="15" methods="2" coveredmethods="2"/>
