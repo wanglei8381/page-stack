@@ -52,11 +52,9 @@ const PageF = Object.assign({}, PageA, {
   }
 })
 
-export default {
-  'page/a': PageA,
-  'page/b': PageB,
-  'page/c': PageC,
-  'page/d': PageD,
-  'page/e': PageE,
-  'page/f': PageF
-}
+Page('page/a', PageA)
+Page('page/b', PageB)
+Page('page/c', PageC)
+Page('page/d', PageD)
+Page('page/e', PageE)
+Page('page/f', PageF)

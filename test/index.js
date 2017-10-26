@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import pageStack from '../src'
+import './service'
 import './pages'
-import models from './models'
+import './models'
 
 const wx = window.wx = {}
 
@@ -34,8 +35,7 @@ Vue.use(pageStack, {
       path: 'page/f',
       tabBar: true
     }
-  ],
-  models
+  ]
 })
 
 describe('Component page-stack', () => {

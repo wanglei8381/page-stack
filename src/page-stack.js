@@ -1,8 +1,8 @@
-import basePage from './base-page'
+import { addPageHook } from './page-hooks'
 import { initRoute } from './route'
 import { remove } from './utils'
-
-export const pageStack = (Vue, pages, models) => {
+const getPage = window.wxTransformGetPage
+export const pageStack = (Vue, pages) => {
   // 当前组件的实例
   let pageStack
 
@@ -21,7 +21,7 @@ export const pageStack = (Vue, pages, models) => {
   const expandPageComponent = (vm) => {
     pages.forEach(({ name, path }) => {
       const PageComponent = Vue.component(name)
-      const PageExtendComponent = PageComponent.extend(basePage(vm, models[path]))
+      const PageExtendComponent = PageComponent.extend(addPageHook(vm, path))
       Vue.component(name, PageExtendComponent)
     })
   }
@@ -72,7 +72,7 @@ export const pageStack = (Vue, pages, models) => {
         this.$forceUpdate()
         if (this.cache[this.router.name]) {
           this.$nextTick(() => {
-            models[this.router.path].onShow()
+            this.callPageHook('Show')
           })
         }
       },
@@ -84,8 +84,15 @@ export const pageStack = (Vue, pages, models) => {
         }
       },
 
+      callPageHook (hook = 'Hide') {
+        const page = getPage(this.router.path)
+        if (page && page['on' + hook]) {
+          page['on' + hook]()
+        }
+      },
+
       navigateTo (options) {
-        models[this.router.path].onHide()
+        this.callPageHook()
         this.router = options
         this.close = false
         this.update()
@@ -116,7 +123,7 @@ export const pageStack = (Vue, pages, models) => {
         this.batchDestroyed(pageNames)
         this.stack = tabBars
         if (this.router.tabBar) {
-          models[this.router.path].onHide()
+          this.callPageHook()
         }
         this.router = options
         this.update()
