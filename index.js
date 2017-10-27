@@ -174,6 +174,11 @@ var pageStack = function (Vue, pages) {
   // 当前组件的实例
   var pageStack;
 
+  // 进入离开动画的名字
+  var getTransitionName = {
+    1: 'wx-page-open',
+    2: 'wx-page-close'
+  };
   var transitionData = {
     name: 'wx-page-open',
     type: 'transition'
@@ -230,8 +235,8 @@ var pageStack = function (Vue, pages) {
         tabBar: true
       };
       this.stack = [];
-      // 当前的操作wx.路由是关闭当前页面
-      this.close = false;
+      // 页面进入离开的类型，1：普通进入，2：返回，3：tab切换
+      this.gotoType = 1;
     },
 
     destroyed: function destroyed () {
@@ -242,6 +247,7 @@ var pageStack = function (Vue, pages) {
       update: function update () {
         var this$1 = this;
 
+        this.$emit('pageChange', this.router.path);
         this.$forceUpdate();
         if (this.cache[this.router.name]) {
           this.$nextTick(function () {
@@ -271,14 +277,14 @@ var pageStack = function (Vue, pages) {
       navigateTo: function navigateTo (options) {
         this.callPageHook();
         this.router = options;
-        this.close = false;
+        this.gotoType = 1;
         this.update();
       },
 
       redirectTo: function redirectTo (options) {
         destroyPageComponent(this.cache, this.stack, this.router.name);
         this.router = options;
-        this.close = false;
+        this.gotoType = 1;
         this.update();
       },
 
@@ -302,6 +308,7 @@ var pageStack = function (Vue, pages) {
         if (this.router.tabBar) {
           this.callPageHook();
         }
+        this.gotoType = 3;
         this.router = options;
         this.update();
       },
@@ -336,7 +343,7 @@ var pageStack = function (Vue, pages) {
           };
         }
 
-        this.close = true;
+        this.gotoType = 2;
         this.update();
       },
 
@@ -345,7 +352,7 @@ var pageStack = function (Vue, pages) {
         this.stack = [];
         this.batchDestroyed(stack);
         this.router = options;
-        this.close = false;
+        this.gotoType = 1;
         this.update();
       }
     },
@@ -362,7 +369,7 @@ var pageStack = function (Vue, pages) {
       } else {
         remove(stack, name);
       }
-      vnode.data.transition.name = this.close ? 'wx-page-close' : 'wx-page-open';
+      vnode.data.transition.name = getTransitionName[this.gotoType];
       stack.push(name);
       vnode.data.keepAlive = true;
       return vnode
