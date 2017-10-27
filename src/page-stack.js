@@ -74,6 +74,7 @@ export const pageStack = (Vue, pages) => {
 
     methods: {
       update () {
+        this.$emit('pageChange', this.router.path)
         this.$forceUpdate()
         if (this.cache[this.router.name]) {
           this.$nextTick(() => {
