@@ -9,11 +9,7 @@ Vue.use(pageStack, {
     pages: [
         {name: 'PagesIndexIndex', path: 'pages/index/index', tabBar: true},
         {name: 'PagesLogsLogs', path: 'pages/logs/logs'}
-    ],
-    models: {
-      'pages/index/index': indexOptions,
-      'pages/logs/logs': logsOptions
-    }
+    ]
 })
 ```
 pages: 页面组件的组件名和路径

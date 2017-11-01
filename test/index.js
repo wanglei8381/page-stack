@@ -49,7 +49,7 @@ describe('Component page-stack', () => {
     }
 
     wx.switchTab({
-      url: 'page/b'
+      url: '/page/b'
     })
   })
 
@@ -73,7 +73,7 @@ describe('Component page-stack', () => {
     }
 
     wx.navigateTo({
-      url: 'page/c?q=1&a=b'
+      url: '/page/c?q=1&a=b'
     })
   })
 
@@ -98,7 +98,7 @@ describe('Component page-stack', () => {
     }
 
     wx.navigateTo({
-      url: 'page/d'
+      url: '/page/d'
     })
   })
 
@@ -148,7 +148,7 @@ describe('Component page-stack', () => {
     }
 
     wx.redirectTo({
-      url: 'page/e?q=1&a=b'
+      url: '/page/e?q=1&a=b'
     })
   })
 
@@ -171,7 +171,7 @@ describe('Component page-stack', () => {
     }
 
     wx.reLaunch({
-      url: 'page/f'
+      url: '/page/f'
     })
   })
 

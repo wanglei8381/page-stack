@@ -1,6 +1,9 @@
 import { addPageHook } from './page-hooks'
 import { initRoute } from './route'
-import { remove } from './utils'
+import {
+  remove,
+  urlParse
+} from './utils'
 const getPage = window.wxTransformGetPage
 export const pageStack = (Vue, pages) => {
   // 当前组件的实例
@@ -43,6 +46,10 @@ export const pageStack = (Vue, pages) => {
   return {
     name: 'page-stack',
 
+    props: {
+      initPath: String
+    },
+
     abstract: true,
 
     beforeCreate () {
@@ -56,13 +63,17 @@ export const pageStack = (Vue, pages) => {
 
     created () {
       this.cache = Object.create(null)
-      const page = pages[0]
-      this.router = {
-        path: page.path,
-        params: {},
-        name: page.name,
-        tabBar: true
+      const { pathname: path, params } = urlParse(this.initPath)
+      let page = {}
+      if (path && pathMap[path]) {
+        page.path = path
+        page.params = params
+        page.tabBar = pathMap[path].tabBar
+        page.name = pathMap[path].name
+      } else {
+        page = pages[0]
       }
+      this.router = page
       this.stack = []
       // 页面进入离开的类型，1：普通进入，2：返回，3：tab切换
       this.gotoType = 1

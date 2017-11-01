@@ -96,6 +96,34 @@ var remove = function (arr, key) {
   }
 };
 
+var resolvePath = function (path, basePath) {
+  if (path[0] === '/') { return path }
+  var a = path.split('/');
+  var l = basePath.split('/');
+  l.pop();
+  for (var i = 0; i < a.length; i++) {
+    var p = a[i];
+    if (p === '.') { continue }
+    if (p === '..') {
+      l.pop();
+    } else {
+      l.push(p);
+    }
+  }
+  return l.join('/')
+};
+
+var urlParse = function (url) {
+  if (!url) { return false }
+  var urls = url.split('?');
+  var pathname = urls[0];
+  var params = decode(urls[1]);
+  return {
+    pathname: pathname,
+    params: params
+  }
+};
+
 /* global wx */
 /**
  * wx.navigateTo 和 wx.redirectTo 不允许跳转到 tabbar 页面，只能用 wx.switchTab 跳转到 tabbar 页面,
@@ -132,23 +160,28 @@ function initRoute (pageStack, pathMap) {
     var success = options.success; if ( success === void 0 ) success = noop;
     var fail = options.fail; if ( fail === void 0 ) fail = noop;
     var complete = options.complete; if ( complete === void 0 ) complete = noop;
-    if (url == null) {
-      console.error('url字段为空');
-      return
+    var res = urlParse(url);
+    if (res === false) {
+      return console.error('url字段为空')
     }
-    var urls = url.split('?');
-    var path = urls[0];
+
+    var pathname = res.pathname;
+    var params = res.params;
+    var router = pageStack.router;
+    var basePath = router.path[0] === '/' ? router.path : '/' + router.path;
+    var realPath = resolvePath(pathname, basePath);
+    var path = realPath[0] === '/' ? realPath.substr(1) : realPath;
     var page = pathMap[path];
+
     if (!page) {
-      console.error('页面切换失败，' + path + '路径不存在');
+      console.error('页面切换失败，' + realPath + '路径不存在');
       return
     }
     var name = page.name;
-    if (name === pageStack.router.name) {
-      console.log('同一个页面不需要切换');
-      return
+    if (name === router.name) {
+      return console.log('同一个页面不需要切换')
     }
-    var params = decode(urls[1]);
+
     pageStack[method]({
       path: path,
       name: name,
@@ -157,6 +190,15 @@ function initRoute (pageStack, pathMap) {
       fail: fail,
       complete: complete
     });
+
+    // 添加history
+    if (inBrowser) {
+      if (method === 'navigateTo') {
+        history.pushState({ path: path }, '', realPath);
+      } else {
+        history.replaceState({ path: path }, '', realPath);
+      }
+    }
   }
 
   // 挂载到window.wx上
@@ -166,6 +208,10 @@ function initRoute (pageStack, pathMap) {
     wx.switchTab = switchTab;
     wx.navigateBack = navigateBack;
     wx.reLaunch = reLaunch;
+
+    window.addEventListener('popstate', function (e) {
+      navigateBack();
+    });
   }
 }
 
@@ -214,6 +260,10 @@ var pageStack = function (Vue, pages) {
   return {
     name: 'page-stack',
 
+    props: {
+      initPath: String
+    },
+
     abstract: true,
 
     beforeCreate: function beforeCreate () {
@@ -227,13 +277,19 @@ var pageStack = function (Vue, pages) {
 
     created: function created () {
       this.cache = Object.create(null);
-      var page = pages[0];
-      this.router = {
-        path: page.path,
-        params: {},
-        name: page.name,
-        tabBar: true
-      };
+      var ref = urlParse(this.initPath);
+      var path = ref.pathname;
+      var params = ref.params;
+      var page = {};
+      if (path && pathMap[path]) {
+        page.path = path;
+        page.params = params;
+        page.tabBar = pathMap[path].tabBar;
+        page.name = pathMap[path].name;
+      } else {
+        page = pages[0];
+      }
+      this.router = page;
       this.stack = [];
       // 页面进入离开的类型，1：普通进入，2：返回，3：tab切换
       this.gotoType = 1;
@@ -377,15 +433,6 @@ var pageStack = function (Vue, pages) {
   }
 };
 
-/*
- pages和option的格式
-
- name是页面组件的名字，path是对应的小程序页面地址，tabBar是在小程序tabBar列表中的页面
- pages: [
- {name: 'PagesIndexIndex', path: 'pages/index/index', tabBar: true},
- {name: 'PagesLogsLogs', path: 'pages/logs/logs'}
- ]
- */
 var index = function (Vue, options) {
   var pages = options.pages;
   Vue.component('page-stack', pageStack(Vue, pages));

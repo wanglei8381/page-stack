@@ -3,8 +3,9 @@
  * wx.navigateTo 和 wx.redirectTo 不允许跳转到 tabbar 页面，只能用 wx.switchTab 跳转到 tabbar 页面,
  * 因为小程序自身的约束，这个在page-stack中并没用限制
  */
-import { decode } from './decode'
 import {
+  urlParse,
+  resolvePath,
   inBrowser,
   noop
 } from './utils'
@@ -37,23 +38,27 @@ export function initRoute (pageStack, pathMap) {
 
   function routeHandler (options, method) {
     const { url, success = noop, fail = noop, complete = noop } = options
-    if (url == null) {
-      console.error('url字段为空')
-      return
+    const res = urlParse(url)
+    if (res === false) {
+      return console.error('url字段为空')
     }
-    const urls = url.split('?')
-    const path = urls[0]
+
+    const { pathname, params } = res
+    const router = pageStack.router
+    const basePath = router.path[0] === '/' ? router.path : '/' + router.path
+    const realPath = resolvePath(pathname, basePath)
+    const path = realPath[0] === '/' ? realPath.substr(1) : realPath
     const page = pathMap[path]
+
     if (!page) {
-      console.error('页面切换失败，' + path + '路径不存在')
+      console.error('页面切换失败，' + realPath + '路径不存在')
       return
     }
     const name = page.name
-    if (name === pageStack.router.name) {
-      console.log('同一个页面不需要切换')
-      return
+    if (name === router.name) {
+      return console.log('同一个页面不需要切换')
     }
-    const params = decode(urls[1])
+
     pageStack[method]({
       path,
       name,
@@ -62,6 +67,15 @@ export function initRoute (pageStack, pathMap) {
       fail,
       complete
     })
+
+    // 添加history
+    if (inBrowser) {
+      if (method === 'navigateTo') {
+        history.pushState({ path }, '', realPath)
+      } else {
+        history.replaceState({ path }, '', realPath)
+      }
+    }
   }
 
   // 挂载到window.wx上
@@ -71,5 +85,9 @@ export function initRoute (pageStack, pathMap) {
     wx.switchTab = switchTab
     wx.navigateBack = navigateBack
     wx.reLaunch = reLaunch
+
+    window.addEventListener('popstate', e => {
+      navigateBack()
+    })
   }
 }

@@ -1,11 +1,11 @@
 {
   "name": "page-stack",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -w -c rollup.config.dev.js",
+    "dev": "rollup -w -c",
     "lint": "eslint src",
     "test": "jest"
   },

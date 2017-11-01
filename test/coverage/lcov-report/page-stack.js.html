@@ -20,14 +20,14 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">97.96% </span>
+        <span class="strong">98.02% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>96/98</span>
+        <span class='fraction'>99/101</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">78.26% </span>
+        <span class="strong">76.19% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>18/23</span>
+        <span class='fraction'>16/21</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">100% </span>
@@ -35,9 +35,9 @@
         <span class='fraction'>6/6</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">97.96% </span>
+        <span class="strong">98.02% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>96/98</span>
+        <span class='fraction'>99/101</span>
       </div>
     </div>
   </div>
@@ -235,10 +235,22 @@
 190
 191
 192
-193</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+193
+194
+195
+196
+197
+198
+199
+200</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -308,6 +320,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -362,6 +375,7 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -435,6 +449,11 @@ export const pageStack = (Vue, pages) =&gt; {
   // 当前组件的实例
   let pageStack
 &nbsp;
+  // 进入离开动画的名字
+  const getTransitionName = {
+    1: 'wx-page-open',
+    2: 'wx-page-close'
+  }
   const transitionData = {
     name: 'wx-page-open',
     type: 'transition'
@@ -488,8 +507,8 @@ export const pageStack = (Vue, pages) =&gt; {
         tabBar: true
       }
       this.stack = []
-      // 当前的操作wx.路由是关闭当前页面
-      this.close = false
+      // 页面进入离开的类型，1：普通进入，2：返回，3：tab切换
+      this.gotoType = 1
     },
 &nbsp;
     destroyed () {
@@ -498,6 +517,7 @@ export const pageStack = (Vue, pages) =&gt; {
 &nbsp;
     methods: {
       update () {
+        this.$emit('pageChange', this.router.path)
         this.$forceUpdate()
         if (this.cache[this.router.name]) {
           this.$nextTick(() =&gt; {
@@ -523,14 +543,14 @@ export const pageStack = (Vue, pages) =&gt; {
       navigateTo (options) {
         this.callPageHook()
         this.router = options
-        this.close = false
+        this.gotoType = 1
         this.update()
       },
 &nbsp;
       redirectTo (options) {
         destroyPageComponent(this.cache, this.stack, this.router.name)
         this.router = options
-        this.close = false
+        this.gotoType = 1
         this.update()
       },
 &nbsp;
@@ -554,6 +574,7 @@ export const pageStack = (Vue, pages) =&gt; {
         <span class="missing-if-branch" title="else path not taken" >E</span>if (this.router.tabBar) {
           this.callPageHook()
         }
+        this.gotoType = 3
         this.router = options
         this.update()
       },
@@ -586,7 +607,7 @@ export const pageStack = (Vue, pages) =&gt; {
           }
         }
 &nbsp;
-        this.close = true
+        this.gotoType = 2
         this.update()
       },
 &nbsp;
@@ -595,7 +616,7 @@ export const pageStack = (Vue, pages) =&gt; {
         this.stack = []
         this.batchDestroyed(stack)
         this.router = options
-        this.close = false
+        this.gotoType = 1
         this.update()
       }
     },
@@ -612,7 +633,7 @@ export const pageStack = (Vue, pages) =&gt; {
       } else {
         remove(stack, name)
       }
-      vnode.data.transition.name = this.close ? 'wx-page-close' : 'wx-page-open'
+      vnode.data.transition.name = getTransitionName[this.gotoType]
       stack.push(name)
       vnode.data.keepAlive = true
       return vnode
@@ -625,7 +646,7 @@ export const pageStack = (Vue, pages) =&gt; {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Thu Oct 26 2017 22:12:47 GMT+0800 (CST)
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Wed Nov 01 2017 14:50:34 GMT+0800 (CST)
 </div>
 </div>
 <script src="prettify.js"></script>
