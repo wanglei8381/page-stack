@@ -77,6 +77,8 @@ export const pageStack = (Vue, pages) => {
       this.stack = []
       // 页面进入离开的类型，1：普通进入，2：返回，3：tab切换
       this.gotoType = 1
+      // 初始化页面
+      getPage(this.router.path)
     },
 
     destroyed () {
@@ -85,6 +87,8 @@ export const pageStack = (Vue, pages) => {
 
     methods: {
       update () {
+        // 初始化页面
+        getPage(this.router.path)
         this.$emit('pageChange', this.router.path)
         this.$forceUpdate()
         if (this.cache[this.router.name]) {

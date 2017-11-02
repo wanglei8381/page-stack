@@ -38,3 +38,9 @@ export const urlParse = url => {
     params
   }
 }
+
+export const toCamelCase = name => {
+  return name.split('/').map((segment) => {
+    return segment.charAt(0).toUpperCase() + segment.slice(1)
+  }).join('')
+}

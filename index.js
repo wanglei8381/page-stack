@@ -124,6 +124,12 @@ var urlParse = function (url) {
   }
 };
 
+var toCamelCase = function (name) {
+  return name.split('/').map(function (segment) {
+    return segment.charAt(0).toUpperCase() + segment.slice(1)
+  }).join('')
+};
+
 /* global wx */
 /**
  * wx.navigateTo 和 wx.redirectTo 不允许跳转到 tabbar 页面，只能用 wx.switchTab 跳转到 tabbar 页面,
@@ -293,6 +299,8 @@ var pageStack = function (Vue, pages) {
       this.stack = [];
       // 页面进入离开的类型，1：普通进入，2：返回，3：tab切换
       this.gotoType = 1;
+      // 初始化页面
+      getPage(this.router.path);
     },
 
     destroyed: function destroyed () {
@@ -303,6 +311,8 @@ var pageStack = function (Vue, pages) {
       update: function update () {
         var this$1 = this;
 
+        // 初始化页面
+        getPage(this.router.path);
         this.$emit('pageChange', this.router.path);
         this.$forceUpdate();
         if (this.cache[this.router.name]) {
@@ -434,7 +444,31 @@ var pageStack = function (Vue, pages) {
 };
 
 var index = function (Vue, options) {
+  if ( options === void 0 ) options = {};
+
   var pages = options.pages;
+  if (!pages) {
+    var config = window.__wxTranformWxConfig__;
+    if (!config) {
+      return console.error('安装page-stack失败，请配置pages选项')
+    }
+
+    var tabBars = {};
+    var appConfig = config.appConfigOrigin;
+    var tabBar = appConfig.tabBar;
+    if (tabBar && tabBar.list) {
+      tabBar.list.forEach(function (item) {
+        tabBars[item.pagePath] = true;
+      });
+    }
+
+    pages = appConfig.pages.map(function (url) { return ({
+      path: url,
+      name: toCamelCase(url),
+      tabBar: tabBars[url]
+    }); });
+  }
+
   Vue.component('page-stack', pageStack(Vue, pages));
 };
 

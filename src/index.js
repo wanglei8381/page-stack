@@ -1,4 +1,5 @@
 import { pageStack } from './page-stack'
+import { toCamelCase } from './utils'
 
 /*
  pages和option的格式
@@ -9,7 +10,29 @@ import { pageStack } from './page-stack'
  {name: 'PagesLogsLogs', path: 'pages/logs/logs'}
  ]
  */
-export default function (Vue, options) {
-  const pages = options.pages
+export default function (Vue, options = {}) {
+  let pages = options.pages
+  if (!pages) {
+    const config = window.__wxTranformWxConfig__
+    if (!config) {
+      return console.error('安装page-stack失败，请配置pages选项')
+    }
+
+    const tabBars = {}
+    const appConfig = config.appConfigOrigin
+    const tabBar = appConfig.tabBar
+    if (tabBar && tabBar.list) {
+      tabBar.list.forEach(item => {
+        tabBars[item.pagePath] = true
+      })
+    }
+
+    pages = appConfig.pages.map(url => ({
+      path: url,
+      name: toCamelCase(url),
+      tabBar: tabBars[url]
+    }))
+  }
+
   Vue.component('page-stack', pageStack(Vue, pages))
 }
